@@ -25,12 +25,16 @@ jobs:
       - name: Build (best effort)
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
-          try {
-            dotnet restore
-            dotnet build .\WhiteAxisRecorder.csproj -c Release /p:AEPath="${{ github.workspace }}\\"
-          } catch {
+          dotnet restore
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "Restore failed, will package source only."
+            $global:LASTEXITCODE = 0
+            return
+          }
+          dotnet build .\WhiteAxisRecorder.csproj -c Release /p:AEPath="${{ github.workspace }}\\"
+          if ($LASTEXITCODE -ne 0) {
             Write-Host "Build failed, will package source only."
+            $global:LASTEXITCODE = 0
           }
 
       - name: Package
