@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          include-prerelease: true
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build .\WhiteAxisRecorder.csproj -c Release /p:AEPath="${{ github.workspace }}\\"
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $outDir = Join-Path $env:GITHUB_WORKSPACE "Plugins\\WhiteAxisRecorder"
+          if (!(Test-Path $outDir)) { throw "Output not found: $outDir" }
+          $zip = Join-Path $env:GITHUB_WORKSPACE ("WhiteAxisRecorder_" + $env:GITHUB_REF_NAME + ".zip")
+          if (Test-Path $zip) { Remove-Item $zip -Force }
+          Compress-Archive -Path (Join-Path $outDir '*') -DestinationPath $zip
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: WhiteAxisRecorder_*.zip
+          generate_release_notes: true

@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- AEPath optional override. -->
+    <AELibPath Condition="'$(AEPath)' != ''">$(AEPath)AEAssistCNVersion\AEAssist\</AELibPath>
+    <AELibPath Condition="'$(AEPath)' == ''">..\..\..\AE\AEAssistCNVersion\AEAssist\</AELibPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputPath Condition="'$(AEPath)' != ''">$(AEPath)Plugins\WhiteAxisRecorder</OutputPath>
+    <OutputPath Condition="'$(AEPath)' == ''">C:\Users\10576\Downloads\AEAssist7.4\Plugins\WhiteAxisRecorder</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputPath Condition="'$(AEPath)' != ''">$(AEPath)Plugins\WhiteAxisRecorder</OutputPath>
+    <OutputPath Condition="'$(AEPath)' == ''">C:\Users\10576\Downloads\AEAssist7.4\Plugins\WhiteAxisRecorder</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DalamudPackagerEnabled>false</DalamudPackagerEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Remove="DalamudPackager" />
+    <PackageReference Include="AEAssist.NET" Version="*" ExcludeAssets="runtime" />
+    <PackageReference Include="Costura.Fody" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="GitInfo" Version="*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

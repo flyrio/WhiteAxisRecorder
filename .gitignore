@@ -1,0 +1,14 @@
+# Build outputs
+bin/
+obj/
+Plugins/
+
+# IDE
+.idea/
+.vs/
+
+# User-specific
+*.user
+*.suo
+*.cache
+*.tmp
