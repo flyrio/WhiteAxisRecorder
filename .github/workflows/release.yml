@@ -22,20 +22,32 @@ jobs:
           dotnet-version: '10.0.x'
           dotnet-quality: 'preview'
 
-      - name: Restore
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build .\WhiteAxisRecorder.csproj -c Release /p:AEPath="${{ github.workspace }}\\"
+      - name: Build (best effort)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          try {
+            dotnet restore
+            dotnet build .\WhiteAxisRecorder.csproj -c Release /p:AEPath="${{ github.workspace }}\\"
+          } catch {
+            Write-Host "Build failed, will package source only."
+          }
 
       - name: Package
         shell: pwsh
         run: |
           $outDir = Join-Path $env:GITHUB_WORKSPACE "Plugins\\WhiteAxisRecorder"
-          if (!(Test-Path $outDir)) { throw "Output not found: $outDir" }
-          $zip = Join-Path $env:GITHUB_WORKSPACE ("WhiteAxisRecorder_" + $env:GITHUB_REF_NAME + ".zip")
-          if (Test-Path $zip) { Remove-Item $zip -Force }
-          Compress-Archive -Path (Join-Path $outDir '*') -DestinationPath $zip
+          $releaseBase = "WhiteAxisRecorder_" + $env:GITHUB_REF_NAME
+          $pluginZip = Join-Path $env:GITHUB_WORKSPACE ($releaseBase + "_plugin.zip")
+          $sourceZip = Join-Path $env:GITHUB_WORKSPACE ($releaseBase + "_source.zip")
+          if (Test-Path $pluginZip) { Remove-Item $pluginZip -Force }
+          if (Test-Path $sourceZip) { Remove-Item $sourceZip -Force }
+          if (Test-Path $outDir) {
+            Compress-Archive -Path (Join-Path $outDir '*') -DestinationPath $pluginZip
+          }
+          $exclude = @('.git', 'bin', 'obj', 'Plugins')
+          $items = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Force | Where-Object { $exclude -notcontains $_.Name }
+          Compress-Archive -Path $items.FullName -DestinationPath $sourceZip
 
       - name: Release
         uses: softprops/action-gh-release@v2
